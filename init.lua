@@ -78,3 +78,29 @@ vim.keymap.set("n", "<leader>e", "<cmd>NvimTreeToggle<CR>")
 vim.keymap.set("n", "<leader>f", "<cmd>Telescope find_files<CR>")
 vim.keymap.set("n", "<C-p>", "<cmd>Telescope find_files<CR>") -- Cursorっぽく
 vim.keymap.set("n", "<leader>g", "<cmd>Telescope live_grep<CR>") -- 要ripgrep
+
+-- 自動保存
+vim.opt.autowriteall = true
+vim.api.nvim_create_autocmd({ "InsertLeave", "TextChanged", "FocusLost" }, {
+  callback = function()
+    if vim.bo.modifiable and vim.bo.buftype == "" and vim.api.nvim_buf_get_name(0) ~= "" then
+      vim.cmd("silent! update")
+    end
+  end,
+})
+
+-- 背景透過
+local transparent_groups = {
+  "Normal", "NormalNC", "NormalFloat", "FloatBorder",
+  "SignColumn", "EndOfBuffer", "LineNr", "CursorLineNr", "FoldColumn",
+}
+local function make_transparent()
+  for _, g in ipairs(transparent_groups) do
+    local hl = vim.api.nvim_get_hl(0, { name = g, link = false })
+    hl.bg = "NONE"
+    hl.ctermbg = "NONE"
+    vim.api.nvim_set_hl(0, g, hl)   -- 文字色は維持して背景だけ消す
+  end
+end
+make_transparent()
+vim.api.nvim_create_autocmd("ColorScheme", { callback = make_transparent })
